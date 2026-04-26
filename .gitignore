@@ -1,41 +1,155 @@
-# 编译输出
-build/
-bin/
-obj/
-*.exe
-*.out
-*.o
-*.a
+# ============================================
+# Visual Studio 和 Windows 特定文件
+# ============================================
 
-# IDE
+# Visual Studio 临时文件、构建目录和用户文件
+.vs/
 .vscode/
-.idea/
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
 *.suo
 *.user
-*.sublime-*
+*.userosscache
+*.aps
+*.ncb
+*.opensdf
+*.sdf
+*.db
+*.tlog
+*.log
+*.idb
+*.pdb
+*.ilk
+*.cache
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.vspscc
+*.vssscc
+*.build
+*.Debug
+*.Release
+*.Debug_x64
+*.Release_x64
+*.Debug_x86
+*.Release_x86
+ipch/
+[Bb]in/
+[Oo]bj/
+[Rr]elease/
+[Dd]ebug/
+x64/
+x86/
 
-# Unity
+# ============================================
+# CMake 构建输出
+# ============================================
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+*.cbp
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.app
+*.lib
+
+# ============================================
+# IDE 特定文件
+# ============================================
+# Visual Studio Code
+.settings/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+
+# ============================================
+# 系统文件
+# ============================================
+Thumbs.db
+.DS_Store
+Desktop.ini
+*.orig
+*.bak
+~$*
+
+# ============================================
+# 依赖和包目录
+# ============================================
+dependencies/
+packages/
+libs/
+external/
+
+# ============================================
+# 二进制和可执行文件
+# ============================================
+*.dmp
+*.heapdump
+*.stackdump
+*.pch
+*.exp
+*.lib
+*.dll.a
+*.ilk
+*.map
+*.exp
+*.manifest
+*.db-shm
+*.db-wal
+*.db-journal
+*.gcda
+*.gcno
+*.gcov
+
+# ============================================
+# 日志和缓存
+# ============================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.pid
+*.pid.lock
+*.seed
+*.seed.*
+
+# ============================================
+# 项目特定的忽略规则
+# ============================================
+# 您的自定义规则（如果有的话）
+
+# 游戏引擎临时文件
+AssetImportTemp/
 Library/
 Temp/
-Obj/
-*.csproj
-*.sln
-*.unityproj
-*.userprefs
+UserSettings/
+Logs/
+Backup/
+CrashDumps/
+MemoryCaptures/
 
-# 系统文件
-.DS_Store
-Thumbs.db
+# 中间文件
+Intermediate/
+DerivedDataCache/
+Saved/
+Binaries/
+Plugins/
 
-# 大文件
-*.zip
-*.rar
-*.7z
-*.tar.gz
-
-# 日志文件
-*.log
-
-# 临时文件
-*.tmp
-*.temp
+# 编译产物
+*.o
+*.obj
