@@ -67,3 +67,20 @@
     - 核心思想：一种完全基于屏幕空间图像的、与场景复杂度无关的抗锯齿技术。它不处理几何边缘，而是识别最终渲染图像中的颜色对比度高的区域（即“边缘”），并对这些区域进行智能的模糊处理。
 13. TAA(Temporal AA) - 初步了解
     - 核心思想：利用时间连续性（即相邻帧之间的信息）来累积超采样本。它假设当前帧的画面与上一帧的画面在内容上是高度相关的，通过将历史帧的像素信息与当前帧混合，来达到用多帧数据“模拟”超高采样率的效果。
+
+### 可视/阻挡
+Z-Buffering
+- 画家算法：先绘制远处的物体，再绘制近处的物体(覆盖原先远处的物体)
+- Z_Buffer算法
+    ```
+    Initialize depth buffer to ∞
+    During rasterization:
+        for (each triangle T)
+            for (each sample(x, y, z) in T)
+                if (z < zbuffer[x][y])
+                    framebuffer[x][y] = color   // 更新像素点的颜色值
+                    zbuffer[x][y] = z           // 更新像素点的深度值
+                else
+                    continue                    // 什么都不做，因为被遮挡了
+    // 时间复杂度：O(n) -- 只是不断求每个像素点的最小值
+    ```
