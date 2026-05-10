@@ -142,8 +142,159 @@ Accurately measure the spatial properties of light
 定义: 辐射（光通量/视觉）强度是指点光源在单位立体角内发出的功率。
 - I(ω) = P / ω (强度 = 功率 / 立体角)
 
-立体角: 角度在3维空间中的延申; 
+立体角: 角度在3维空间中的延伸; 
 - Ω = A / r² (立体角 = 面积 / 半径的平方)
 
+#### Irradiance
+定义: 每个单位面积上的能量
+
+#### Radiance
+定义: 每立体角上的Irradiance/每单位面积上的Intensity
+
+#### Bidirectional Reflectance Distribution Function (BRDF)
+
+#### Rendering Equation(渲染方程)
+
+### 全局光照
+直接光照和间接光照的集合
+
+### Path Tracing(路径追踪)
+```
+shade(p, wo)
+    Randomly choose N directions wi~pdf
+    Lo = 0.0
+    For each wi:
+        Trace a ray r(p, wi)
+        If ray r hit the light
+            Lo += (1/N) * L_i * f_r * cosine / pdf(wi)
+        Else If ray hit a object at q
+            Lo += (1/N) * shade(q, -wi) * f_r * cosine / pdf(wi)
+    Return Lo
+
+因为N随机的话会指数增加，所以要限制N的范围-N = 1
+shade(p, wo)
+    Randomly choose One direction wi~pdf(w)
+    Trace a ray r(p, wi)
+    If ray r hit the light
+        Return L_i * f_r * cosine / pdf(wi)
+    Else If ray hit a object at q
+        Return shade(q, -wi) * f_r * cosine / pdf(wi)
+```
+如果N选择1的话噪声会很大，但是通过1个像素的路径可以有很多，我们只要对多条路径的值求平均就可以减少噪声
+```
+ray_generation(cameraPos, pixel)
+    Uniformly choose N sample positions within the pixel
+    pixel_radiance = 0.0
+    For each sample in the pixel:
+        Shoot a ray r(cameraPos, camera_to_sample)
+        If ray r hit the scene at p
+            pixel_radiance += 1/N * shade(p, sample_to_camera)
+    Return pixel_radiance
+```
+
+目前还有个问题：路径追踪算法没有结束，会无限递归\
+解决方法: 俄罗斯轮盘赌(Russian Roulette) - RR
+- 设置一个可能值P
+- 在P的概率下，发射射线ray并且返回结果Lo/P
+- 在1-P的概率下，返回0
+- E = P * Lo/P + (1-P) * 0 = Lo(expectation)
+```
+shade(p, wo)
+    Manually specify a probability P_RR
+    Randomly select ksi in a uniform dist. in [0, 1]
+    If ksi > P_RR return 0.0
 
 
+    Randomly choose One direction wi~pdf(w)
+    Trace a ray r(p, wi)
+    If ray r hit the light
+        Return L_i * f_r * cosine / pdf(wi) / P_RR
+    Else If ray hit a object at q
+        Return shade(q, -wi) * f_r * cosine / pdf(wi) / P_RR
+```
+但是物体向随机方向发射射线会有浪费，所有转化为光源采样\
+做换元dw = dA cos ϕ / ||x' - x||² (x是物体上的点，x'是光源上的点)\
+将光线传播分成两个部分:
+1. 光源 - 直接对光源采样
+2. 其他物体反射 - 递归调用shade函数
+```
+shade(p, wo)
+    Uniformly sample the ligth at x' (pdf_light = 1/A)
+    Shoot a ray r(x', p)
+    If ray r hit the scene at p
+        L_dir = 0.0
+    Else
+        L_dir = L_i * f_r * cosθ * cosθ‘ / |x' - p|² / pdf_light
+
+    L_indir = 0.0
+    Test Russian Roulette with probability P_RR
+    Uniformly sample the hemisphere towards wi (pdf_hemi = 1/2pi)
+    Trace a ray r(p, wi)
+    If ray r hit a non-emitting object at q
+        L_indir = shade(q, -wi) * f_r * cosine / pdf_hemi / P_RR
+    
+    Return L_dir + L_indir
+```
+
+---
+### 辐射度量学详解
+
+辐射度量学的核心目标是**为光的测量建立一个精确、基于物理的量化体系**。在它出现之前，我们对“明暗”、“亮度”的描述是相对和主观的。辐射度量学引入了一系列精确定义的物理量，使得我们能够像描述“长度是多少米”、“质量是多少千克”一样，去描述“光”的能量、强度和分布。
+
+#### 1. 立体角
+这是理解后续所有概念的基础。
+*   **定义**：**立体角是角度在三维空间中的延伸**。平面角衡量的是一个方向在二维平面上张开的“大小”（单位是弧度），而立体角衡量的是一个锥面在三维空间中张开的“大小”（单位是球面度，sr）。
+*   **直观理解**：想象在空间中的一个点，向四周发射一个锥体，这个锥体在单位球面（半径为1的球面）上“切”下来的那块面积的大小，就是这个锥体所对应的立体角的数值。
+*   **公式**：对于一个在球面上投影面积为A的小面元，其对于球心所张的立体角为 **Ω = A / r²**。当球半径为1时，立体角在数值上就等于投影面积A。
+
+#### 2. Radiant Flux
+*   **中文常译**：辐射通量/光通量
+*   **定义**：**单位时间内通过某个面或由光源发出的总能量**。可以简单理解为光的“功率”，单位是瓦特。
+*   **理解**：它描述的是光源的“总发电量”或一个区域光的“总流量”，但不关心能量是如何分布的。例如，一个100瓦的白炽灯和一个100瓦的LED灯，它们的 Radiant Flux 是相同的，但亮度和光色分布可能完全不同。
+
+#### 3. Radiant Intensity
+*   **中文常译**：辐射强度
+*   **定义**：**描述点光源在单位立体角内发出的功率**。公式为 **I = dΦ / dω**， 即单位立体角内的辐射通量。
+*   **理解**：它描述了光源能量在**方向**上的分布密度。对于一个各向同性的理想点光源（向所有方向均匀发光），其强度 I = Φ / 4π（因为整个球面的立体角是4π）。它解决了“光源在某个特定方向上有多亮”的问题。
+
+#### 4. Irradiance
+*   **中文常译**：辐照度
+*   **定义**：**单位面积上所接收到的辐射通量**。公式为 **E = dΦ / dA**， 即单位面积接收到的功率。
+*   **理解**：它描述的是**一个表面接收到了多少光能**，是照射到表面的量。这是着色计算中一个关键输入。
+*   **重要性质**：对于一个点光源，**Irradiance 与距离的平方成反比**。这是因为从光源发出的总通量 Φ 会均匀分布在一个不断变大的球面上（面积与 r² 成正比），所以单位面积接收到的能量（E）自然与 r² 成反比。同时，**Irradiance 与光线入射角的余弦（cosθ）成正比**（即兰伯特余弦定律），表面越“正对”光线，接收到的能量越多。
+
+#### 5. Radiance
+*   **中文常译**：辐射率
+*   **定义**：这是**辐射度量学中最核心、最基础的物理量**。它衡量的是**在单位立体角、单位投影面积上的辐射通量**。公式为 **L = d²Φ / (dω dA cosθ)**。可以从两个等价角度理解：
+    1.  对于一个微小表面 dA， Radiance 是它在某个方向（dω）上发射/反射/透射的光强。
+    2.  对于在空间传播的一束光线，Radiance 精确描述了这束光线的“亮度”。
+*   **理解**：**Irradiance 描述“表面收到多少光”，而 Radiance 描述“光在空间中传播时的状态”**。它是连接光源、物体表面和相机（眼睛）的桥梁。
+*   **重要性质**：在真空中沿直线传播时，**Radiance 保持不变**。这意味着，当我们从不同距离观察同一束光时，虽然它的 Irradiance 会随距离平方衰减，但其本质的“亮度”（Radiance）是不变的。这保证了视觉的一致性。
+
+#### 6. BRDF
+*   **全称**：Bidirectional Reflectance Distribution Function
+*   **中文**：双向反射分布函数
+*   **定义**：描述了**当一束光从某个方向入射到一个表面点时，能量如何被反射到各个出射方向**。其数学定义基于 Radiance 和 Irradiance：**BRDF = dL_r / dE_i**。即，出射的 Radiance 与入射产生的 Irradiance 的比值。
+*   **理解**：**BRDF 定义了一个材质的外观**。它回答了“一束光从这个角度打过来，从这个角度看过去，这个点应该有多亮？”这个问题。不同的 BRDF 模型（如漫反射的兰伯特模型、镜面反射的模型、复杂的微表面模型）对应了不同的材质，如石膏、金属、塑料、丝绸等。
+
+#### 7. The Rendering Equation
+*   **中文**：渲染方程
+*   **定义**：由 Jim Kajiya 于1986年提出的方程，**完美地描述了光线在场景中达到稳态分布时，一个点向某个方向发出的 Radiance**。其标准形式为：
+    **L_o(p, ω_o) = L_e(p, ω_o) + ∫_Ω f_r(p, ω_i, ω_o) L_i(p, ω_i) cosθ_i dω_i**
+*   **解读**：
+    *   **L_o**: 从点 p 向方向 ω_o 出射的 Radiance（即我们最终想求的颜色/亮度）。
+    *   **L_e**: 点 p 自身作为光源发出的 Radiance（自发光）。
+    *   **积分部分**: 来自场景中**所有方向** ω_i 的入射光 Li，经过该点材质的 BRDF 作用后，对出射方向 ω_o 的贡献总和。`cosθ_i` 是入射角因子。
+*   **意义**：**这是全局光照的数学描述，是几乎所有现代物理渲染算法的终极目标**。它表达了：一个点的出射光 = 它的自发光 + 来自环境中所有其他点的反射光。这是一个递归的、能量守恒的方程。文档后面提到的 Path Tracing 算法，就是通过随机采样来求解这个积分方程的一种蒙特卡洛方法。
+
+### 概念串联与总结
+现在，让我们把这些概念放入一个完整的光线传播故事中：
+
+1.  **光源**：一个灯泡以一定的 **Radiant Intensity** 向四周发射光能。
+2.  **光的传播**：这束光在空间中以 **Radiance** 来度量其传播状态。
+3.  **到达表面**：当这束光照射到一个微小表面 dA 上时，我们通过 **Irradiance** 来度量这个表面接收到了多少光能。
+4.  **表面交互**：表面根据其材质属性（由 **BRDF** 定义），决定将接收到的能量（Irradiance）如何重新分配，向各个方向反射出去，形成新的出射 **Radiance**。
+5.  **全局平衡**：场景中每一个点都在重复步骤3和4，所有点的入射和出射光共同构成了一个复杂的能量交换网络，这个网络最终达到的平衡状态，就由 **渲染方程** 所描述。
+6.  **进入人眼/相机**：从物体表面指向相机像素方向的那束出射 **Radiance**，经过一系列传播后进入相机，最终决定了像素的颜色。
+
+**因此，辐射度量学为我们提供了描述这个“光的故事”中每一个环节的精确“度量衡”，而渲染方程则是这个故事的完整剧本。** 理解这些概念是掌握Path Tracing等现代渲染算法的必备理论基础。
