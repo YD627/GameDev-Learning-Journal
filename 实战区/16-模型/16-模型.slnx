@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="16-模型/16-模型.vcxproj" Id="99859add-308f-495d-8881-40b2e557a8b5" />
+</Solution>

@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="19-立方体贴图/19-立方体贴图.vcxproj" Id="daaadba7-32c3-4415-b783-297bb45868d4" />
+</Solution>

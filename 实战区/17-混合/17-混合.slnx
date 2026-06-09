@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="17-混合/17-混合.vcxproj" Id="a7571380-b2ae-4266-a349-84893b861b85" />
+</Solution>

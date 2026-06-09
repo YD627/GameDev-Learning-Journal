@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="13-投光物/13-投光物.vcxproj" Id="2dd0fcaa-05f5-4b17-bb8a-578390e5b0b6" />
+</Solution>

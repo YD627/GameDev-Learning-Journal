@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="18-帧缓冲/18-帧缓冲.vcxproj" Id="4f561f39-267e-4139-8041-153c37b6942f" />
+</Solution>

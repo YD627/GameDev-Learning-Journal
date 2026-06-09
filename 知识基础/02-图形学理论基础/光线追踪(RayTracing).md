@@ -13,6 +13,7 @@
 
 Pinhole Camera Model
 1. 从眼睛(点)看向每个像素的方向，找到最近的交点
+    - 实际做法是从眼睛（相机）位置向像素方向发射射线，找到最近的交点
 2. 从交点往光源(点)方向连线，判断该点是否在阴影中
 3. 如果不在阴影中，对该点进行着色计算
 4. 写回像素
@@ -145,15 +146,25 @@ Accurately measure the spatial properties of light
 立体角: 角度在3维空间中的延伸; 
 - Ω = A / r² (立体角 = 面积 / 半径的平方)
 
+- 单位面积: dA = r²sinθdθdφ
+- 单位立体角: dΩ = dA / r² = r²sinθdθdφ / r² = sinθdθdφ
+
+- 一个球的Intensity: I = Φ / 4π
+
 #### Irradiance
-定义: 每个单位面积上的能量
+定义: 某个表面每单位面积接收到多少辐射功率
+- E(x) = dΦ(x) / dA 
 
 #### Radiance
 定义: 每立体角上的Irradiance/每单位面积上的Intensity
+- L = d²Φ / dAcosθ dΩ = dE(p) / dΩ cosθ = dI(ω) / dAcosθ
 
 #### Bidirectional Reflectance Distribution Function (BRDF)
+##### 反射方程
+定义任何一个着色点在各种不同的光照环境下，考虑任何一个光照的进入方向对某一个出射方向的贡献。
 
 #### Rendering Equation(渲染方程)
+定义：在反射方程的基础上加上物体往特定方向的自发光。
 
 ### 全局光照
 直接光照和间接光照的集合
@@ -234,6 +245,16 @@ shade(p, wo)
         L_indir = shade(q, -wi) * f_r * cosine / pdf_hemi / P_RR
     
     Return L_dir + L_indir
+```
+#### 期望弹射次数
+```
+假设概率p存活
+E = 期望弹射次数
+第一次一定发生，所以先贡献1
+之后有p的概率存活
+所以E = 1 + p * E
+得到E = 1 / (1 - p)
+
 ```
 
 ---

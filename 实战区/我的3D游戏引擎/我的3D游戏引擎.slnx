@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="我的3D游戏引擎/我的3D游戏引擎.vcxproj" />
+</Solution>
